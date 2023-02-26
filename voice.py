@@ -47,24 +47,32 @@ def grabar_audio(nombre_archivo, duracion_segundos):
     print(f"Se ha grabado el archivo {nombre_archivo}")
 
 def obtener_texto():
-    
+    # Carga el modelo de detección de idioma
     model = whisper.load_model('base')
     
+    # Carga el archivo de audio grabado previamente
     audio = whisper.load_audio("grabacion.wav")
+    
+    # Aplica padding o recorte al audio para que tenga la longitud requerida por el modelo
     audio = whisper.pad_or_trim(audio)
     
+    # Calcula el espectrograma de Mel en escala logarítmica a partir del audio
     mel = whisper.log_mel_spectrogram(audio).to(model.device)
     
+    # Detecta el idioma en base al espectrograma de Mel
     _, probs = model.detect_language(mel)
     print(f"Detected language: {max(probs, key=probs.get)}")
     
+    # Configura las opciones de decodificación del modelo
     options = whisper.DecodingOptions(fp16=False)
+    
+    # Decodifica el espectrograma de Mel para obtener el texto transcrito
     result = whisper.decode(model, mel, options)
     
+    # Devuelve el texto transcrito
     return result.text
 
-# Ejemplo de uso
 grabar_audio("grabacion.wav", 10)  # Grabar 10 segundos de audio y guardarlos en un archivo .wav con el nombre "grabacion.wav"
 
-resultado = obtener_texto()
+resultado = obtener_texto() # Tomar el archivo .wav y convertirlo a texto usando la libreria whisper
 print(resultado)
