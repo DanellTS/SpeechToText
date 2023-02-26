@@ -2,8 +2,15 @@ import pyaudio
 import wave
 import os
 import whisper
+from pydub import AudioSegment
+from pydub.playback import play
 
 def grabar_audio(nombre_archivo, duracion_segundos):
+    
+    # Carga audios de inicio y fin de grabación
+    audio_start = AudioSegment.from_wav("start.wav")
+    audio_end = AudioSegment.from_wav("end.wav")
+    
     # Eliminar el archivo grabacion.wav
     if os.path.exists("grabacion.wav"):
         os.remove("grabacion.wav")
@@ -27,10 +34,17 @@ def grabar_audio(nombre_archivo, duracion_segundos):
 
     # Duración de la grabación
     frames = []
+    
+    # Reproduce el audio de inicio
+    play(audio_start)
+    
     for i in range(0, int(input_rate / chunk * duracion_segundos)):
         data = stream.read(chunk)  # Leer los datos de audio del stream
         frames.append(data)
 
+    # Reproduce el audio de fin
+    play(audio_end)
+    
     # Detener la captura de audio
     stream.stop_stream()
     stream.close()
