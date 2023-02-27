@@ -1,3 +1,5 @@
+import openai
+import pyttsx3
 import pyaudio
 import wave
 import os
@@ -86,7 +88,39 @@ def obtener_texto():
     # Devuelve el texto transcrito
     return result.text
 
-grabar_audio("grabacion.wav", 10)  # Grabar 10 segundos de audio y guardarlos en un archivo .wav con el nombre "grabacion.wav"
+def enviar_texto(texto):
+    
+    openai.api_key = '###'
+    
+    prompt = (texto)
+    
+    response = openai.Completion.create(
+        engine="text-davinci-003",
+        prompt=prompt,
+        max_tokens=1024
+    )
+    
+    return response["choices"][0]["text"]
+    
+def generar_voz(texto):
+    
+    engine = pyttsx3.init()
+    engine.say(texto)
+    
+    for voice in engine.getProperty('voices'):
+        print(voice)
+    
+    voice = engine.getProperty('voices')
+    engine.setProperty('voice', "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Speech\Voices\Tokens\MSTTS_V110_trTR_Tolga")
+    #engine.setProperty('voice',voice[2].id)
+    engine.runAndWait()
 
-resultado = obtener_texto() # Tomar el archivo .wav y convertirlo a texto usando la libreria whisper
-print(resultado)
+grabar_audio("grabacion.wav", 5)  # Grabar 10 segundos de audio y guardarlos en un archivo .wav con el nombre "grabacion.wav"
+
+resultadoMicro = obtener_texto() # Tomar el archivo .wav y convertirlo a texto usando la libreria whisper
+print(resultadoMicro)
+
+resultadoGPT = enviar_texto(resultadoMicro)
+print(resultadoGPT)
+
+generar_voz(resultadoGPT)
